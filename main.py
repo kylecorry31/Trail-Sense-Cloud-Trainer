@@ -99,6 +99,6 @@ for row in rows:
     value = argmax(prediction)
     if value == cloud_type_map[row['Type']]:
         correct += 1
-    # print(row['Type'], value, prediction[value])
+    print(row['Type'], value, prediction[value])
 
 print(correct / len(rows))
