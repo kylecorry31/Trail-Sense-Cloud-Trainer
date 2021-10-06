@@ -8,6 +8,34 @@ with open('clouds.csv') as csvfile:
     for row in reader:
         rows.append(row)
 
+size = 10
+
+# AMT Used the following map
+
+# cloud_type_map = {
+#     'Ci': 0,
+#     'Cs': 0,
+#     'Cc': 1,
+#     'Ac': 1,
+#     'As': 2,
+#     'St': 2,
+#     'Ns': 3,
+#     'Cb': 3,
+#     'Sc': 4,
+#     'Cu': 5,
+# }
+
+# inverse_cloud_type_map = [
+#     'Ci/Cs',
+#     'Cc/Ac',
+#     'As/St',
+#     'Ns/Cb',
+#     'Sc',
+#     'Cu'
+# ]
+
+# Might be useful to make St consist of St, Ns, and As for now
+
 cloud_type_map = {
     'Ci': 0,
     'Cc': 1,
@@ -21,6 +49,19 @@ cloud_type_map = {
     'Cb': 9
 }
 
+inverse_cloud_type_map = [
+    'Ci',
+    'Cc',
+    'Cs',
+    'As',
+    'Ac',
+    'Ns',
+    'Sc',
+    'Cu',
+    'St',
+    'Cb'
+]
+
 # Runs softmax on X
 def predict(X, w):
     z = np.dot(X, w)
@@ -29,8 +70,8 @@ def predict(X, w):
 
 def train_softmax(X, y):
     w = np.random.randn(X.shape[1], y.shape[1]) * 0.1
-    T = 100
-    n = 100
+    T = 1000
+    n = 5
     N = X.shape[0]
     epsilon = 0.1
     randomIndices = np.random.permutation(np.arange(N))
@@ -58,7 +99,8 @@ def fCE_gradient(X, w, y):
     return X.T.dot(pred) / float(n)
 
 def get_label(id):
-    arr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    global size
+    arr = [0] * size
     arr[id] = 1
     return arr
 
@@ -102,11 +144,27 @@ print_weights(weights)
 
 correct = 0
 
+confusionMatrix = []
+for i in range(0, size):
+    row = []
+    for j in range(0, size):
+        row.append(0)
+    confusionMatrix.append(row)
+
+samples = [0] * size
+
 for row in rows:
     prediction = predict(np.array([get_data(row)]), weights)[0]
     value = argmax(prediction)
-    if value == cloud_type_map[row['Type']]:
+    true_value = cloud_type_map[row['Type']]
+    samples[true_value] += 1
+    confusionMatrix[true_value][value] += 1
+
+    if value == true_value:
         correct += 1
-    print(row['Type'], value, prediction[value])
+
+print('     ', list(map(lambda x: f' {inverse_cloud_type_map[x]} ', range(0, size))))
+for row in range(0, len(confusionMatrix)):
+    print(f'{inverse_cloud_type_map[row]:5}', list(map(lambda x: "{:.2f}".format(x / samples[row]) if samples[row] > 0 else "0.00", confusionMatrix[row])))
 
 print(correct / len(rows))
