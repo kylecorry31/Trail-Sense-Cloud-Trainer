@@ -63,14 +63,19 @@ def get_label(id):
     return arr
 
 def get_data(row):
-    scale = 100.0
     return [
-        int(row['CC']) / scale,
-        int(row['CON']) / scale,
-        int(row['EN']) / scale,
-        int(row['ENT']) / scale,
-        int(row['HOM']) / scale,
-        int(row['LUM']) / scale,
+        float(row['CC']),
+        float(row['R']),
+        float(row['B']),
+        float(row['RG']),
+        float(row['RB']),
+        float(row['GB']),
+        float(row['EN']),
+        float(row['ENT']),
+        float(row['CON']),
+        float(row['HOM']),
+        float(row['BSTD']),
+        float(row['BSK']),
         1
     ]
 
