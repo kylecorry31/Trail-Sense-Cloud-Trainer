@@ -88,7 +88,10 @@ def argmax(values):
 
 def print_weights(weights):
     weight_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(lambda s: str(s) + 'f', x)) + ")", weights))
-    print("arrayOf(" + ", ".join(weight_strings) + ")")
+    weight_arr = "arrayOf(" + ", ".join(weight_strings) + ")"
+    f = open("/data/weights.txt", "w")
+    f.write(weight_arr)
+    f.close()
 
 X = np.array(list(map(get_data, rows)))
 
