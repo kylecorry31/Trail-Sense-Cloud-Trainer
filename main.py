@@ -1,6 +1,8 @@
 import numpy as np
 import csv
 
+from numpy import random
+
 rows = []
 
 with open('clouds.csv') as csvfile:
@@ -9,32 +11,6 @@ with open('clouds.csv') as csvfile:
         rows.append(row)
 
 size = 10
-
-# AMT Used the following map
-
-# cloud_type_map = {
-#     'Ci': 0,
-#     'Cs': 0,
-#     'Cc': 1,
-#     'Ac': 1,
-#     'As': 2,
-#     'St': 2,
-#     'Ns': 3,
-#     'Cb': 3,
-#     'Sc': 4,
-#     'Cu': 5,
-# }
-
-# inverse_cloud_type_map = [
-#     'Ci/Cs',
-#     'Cc/Ac',
-#     'As/St',
-#     'Ns/Cb',
-#     'Sc',
-#     'Cu'
-# ]
-
-# Might be useful to make St consist of St, Ns, and As for now
 
 cloud_type_map = {
     'Ci': 0,
@@ -135,12 +111,34 @@ def print_weights(weights):
     f.write(weight_arr)
     f.close()
 
-X = np.array(list(map(get_data, rows)))
+def print_input(inputs):
+    x_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(lambda s: str(s) + 'f', x)) + ")", inputs))
+    x_arr = "arrayOf(" + ", ".join(x_strings) + ")"
+    f = open("/data/input.txt", "w")
+    f.write(x_arr)
+    f.close()
 
+def print_labels(labels):
+    x_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(str, x)) + ")", labels))
+    x_arr = "arrayOf(" + ", ".join(x_strings) + ")"
+    f = open("/data/labels.txt", "w")
+    f.write(x_arr)
+    f.close()
+
+X = np.array(list(map(get_data, rows)))
 Y = np.array(list(map(lambda x: get_label(cloud_type_map[x['Type']]), rows)))
+
+randomIndices = np.random.permutation(np.arange(X.shape[0]))
+
+X = X[randomIndices]
+Y = Y[randomIndices]
+
+# TODO: Split into train and test data when there is enough samples
 
 weights = train_softmax(X, Y)
 print_weights(weights)
+print_input(X)
+print_labels(Y)
 
 correct = 0
 
@@ -153,10 +151,10 @@ for i in range(0, size):
 
 samples = [0] * size
 
-for row in rows:
-    prediction = predict(np.array([get_data(row)]), weights)[0]
+for i in range(0, len(X)):
+    prediction = predict(np.array([X[i]]), weights)[0]
     value = argmax(prediction)
-    true_value = cloud_type_map[row['Type']]
+    true_value = argmax(Y[i])
     samples[true_value] += 1
     confusionMatrix[true_value][value] += 1
 
