@@ -1,10 +1,11 @@
 import numpy as np
 import csv
 
+import matplotlib.pyplot as plt
 from numpy import random
 
 rows = []
-data_root = '/data'
+data_root = 'data'
 
 with open('clouds.csv') as csvfile:
     reader = csv.DictReader(csvfile)
@@ -41,26 +42,31 @@ inverse_cloud_type_map = [
 
 # Runs softmax on X
 def predict(X, w):
-    z = np.dot(X, w)
-    exponents = np.exp(z - np.max(z, axis=1, keepdims=True))
-    return exponents / np.sum(exponents, axis=1, keepdims=True)
+    distances = np.zeros(shape=(w.shape[0]))
+    for i in range(w.shape[0]):
+        distances[i] = 1 / distance(X, w[i])
+    exponents = np.exp(distances - np.max(distances))
+    return [exponents / np.sum(exponents)]
 
-def train_softmax(X, y):
-    w = np.random.randn(X.shape[1], y.shape[1]) * 0.1
-    T = 1000
-    n = 5
-    N = X.shape[0]
-    epsilon = 0.1
-    randomIndices = np.random.permutation(np.arange(N))
-    randX = X[randomIndices]
-    randY = y[randomIndices]
-    for i in range(T):
-        for r in range(int(np.ceil(N / float(n)))):
-            batch = randX[r*n:r*n + n]
-            batchY = randY[r*n:r*n + n]
-            gradient = fCE_gradient(batch, w, batchY)
-            w = w - epsilon * gradient
-    return w
+def distance(X, sample):
+    weights = np.array([[10, 20, 1, 1, 10, 10, 5, 5, 8, 8, 5, 5, 1]])
+    weights = weights / np.sum(weights)
+    return np.sum(np.abs(X - sample) * weights)
+
+def train(X, y):
+    averages = np.zeros(shape=(y.shape[1], X.shape[1]))
+    counts = np.zeros(shape=(y.shape[1]))
+
+    for i in range(len(X)):
+        label = np.argmax(y[i])
+        averages[label] += X[i]
+        counts[label] += 1
+
+    for i in range(len(averages)):
+        if counts[i] > 0:
+            averages[i] /= counts[i]
+
+    return averages
 
 # Calculates the cross-entropy loss
 def fCE(X, w, y): # TODO: figure this out
@@ -108,7 +114,7 @@ def argmax(values):
 def print_weights(weights):
     weight_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(lambda s: str(s) + 'f', x)) + ")", weights))
     weight_arr = "arrayOf(" + ", ".join(weight_strings) + ")"
-    f = open(data_root + "/weights.txt", "w")
+    f = open(data_root + "/averages.txt", "w")
     f.write(weight_arr)
     f.close()
 
@@ -136,10 +142,8 @@ Y = Y[randomIndices]
 
 # TODO: Split into train and test data when there is enough samples
 
-weights = train_softmax(X, Y)
+weights = train(X, Y)
 print_weights(weights)
-print_input(X)
-print_labels(Y)
 
 correct = 0
 
