@@ -11,19 +11,6 @@ with open('clouds.csv') as csvfile:
 
 size = 10
 
-cloud_type_map = {
-    'Ci': 0,
-    'Cc': 1,
-    'Cs': 2,
-    'As': 3,
-    'Ac': 4,
-    'Ns': 5,
-    'Sc': 6,
-    'Cu': 7,
-    'St': 8,
-    'Cb': 9
-}
-
 inverse_cloud_type_map = [
     'Ci',
     'Cc',
@@ -88,7 +75,7 @@ def print_labels(labels):
     f.close()
 
 X = np.array(list(map(get_data, rows)))
-Y = np.array(list(map(lambda x: get_label(cloud_type_map[x['Type']]), rows)))
+Y = np.array(list(map(lambda x: get_label(int(x['Type'])), rows)))
 
 clf = KNeighborsClassifier(n_neighbors=20)
 clf.fit(X, Y)

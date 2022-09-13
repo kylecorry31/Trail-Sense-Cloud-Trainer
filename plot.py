@@ -13,19 +13,6 @@ with open('clouds.csv') as csvfile:
 
 size = 10
 
-cloud_type_map = {
-    'Ci': 0,
-    'Cc': 1,
-    'Cs': 2,
-    'As': 2,
-    'Ac': 1,
-    'Ns': 2,
-    'Sc': 1,
-    'Cu': 1,
-    'St': 2,
-    'Cb': 1
-}
-
 inverse_cloud_type_map = [
     'Ci',
     'Cc',
@@ -63,8 +50,12 @@ def get_data(row):
     ]
 
 X = np.array(list(map(lambda x: get_data(x), rows)))
+# X = np.array(list(map(lambda x: float(x['Type']), rows)))
+# Y = np.array(list(map(lambda x: float(x['HOM']), rows)))
 p = pca(X.T)
-colors = np.array(list(map(lambda x: 9 - cloud_type_map[x['Type']], rows)))
+X = p[:, 0]
+Y = p[:, 1]
+colors = np.array(list(map(lambda x: 9 - int(x['Type']), rows)))
 
-plt.scatter(p[:, 0], p[:, 1], c=colors, cmap='tab10')
+plt.scatter(X, Y, c=colors, cmap='tab10')
 plt.show()
