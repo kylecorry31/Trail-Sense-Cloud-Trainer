@@ -65,7 +65,7 @@ def print_labels(labels):
 X = np.array(list(map(lambda x: get_data(x), rows)))
 Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
 
-clf = KNeighborsClassifier(n_neighbors=20)
+clf = KNeighborsClassifier(n_neighbors=7)
 clf.fit(X, Y)
 
 correct = 0
@@ -95,4 +95,10 @@ print('     ', list(map(lambda x: f' {inverse_cloud_type_map[x]} ', range(0, siz
 for row in range(0, len(confusionMatrix)):
     print(f'{inverse_cloud_type_map[row]:5}', list(map(lambda x: "{:.2f}".format(x / samples[row]) if samples[row] > 0 else "0.00", confusionMatrix[row])))
 
+print()
+
+for row in range(0, len(confusionMatrix)):
+    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row]))
+
+print()
 print(correct / len(rows))
