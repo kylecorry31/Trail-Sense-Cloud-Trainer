@@ -5,11 +5,9 @@ from sklearn.neighbors import KNeighborsClassifier
 rows = []
 
 with open('clouds.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
+    reader = csv.reader(csvfile)
     for row in reader:
         rows.append(row)
-
-size = 10
 
 inverse_cloud_type_map = [
     'Ci',
@@ -24,6 +22,8 @@ inverse_cloud_type_map = [
     'Cb'
 ]
 
+size = len(inverse_cloud_type_map)
+
 def get_label(id):
     global size
     arr = [0] * size
@@ -31,20 +31,7 @@ def get_label(id):
     return arr
 
 def get_data(row):
-    return [
-        float(row['CC']),
-        float(row['R']),
-        float(row['B']),
-        float(row['RG']),
-        float(row['RB']),
-        float(row['GB']),
-        float(row['EN']),
-        float(row['ENT']),
-        float(row['CON']),
-        float(row['HOM']),
-        float(row['BSTD']),
-        float(row['BSK'])
-    ]
+    return list(map(float, row[1:]))
 
 def argmax(values):
     m = 0
@@ -74,8 +61,9 @@ def print_labels(labels):
     f.write(x_arr)
     f.close()
 
-X = np.array(list(map(get_data, rows)))
-Y = np.array(list(map(lambda x: get_label(int(x['Type'])), rows)))
+# 1, 5
+X = np.array(list(map(lambda x: get_data(x), rows)))
+Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
 
 clf = KNeighborsClassifier(n_neighbors=20)
 clf.fit(X, Y)

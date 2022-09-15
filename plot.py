@@ -36,6 +36,8 @@ def pca(X, k=2):
 def get_data(row):
     return list(map(float, row[1:]))
 
+# X = np.array(list(map(lambda x: float(x[1]), rows)))
+# Y = np.array(list(map(lambda x: float(x[5]), rows)))
 X = np.array(list(map(lambda x: get_data(x), rows)))
 p = pca(X.T)
 X = p[:, 0]
