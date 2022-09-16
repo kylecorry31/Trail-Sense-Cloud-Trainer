@@ -2,6 +2,7 @@ import numpy as np
 import csv
 
 from numpy import random
+from sklearn.model_selection import train_test_split
 
 rows = []
 data_root = 'data'
@@ -104,17 +105,26 @@ Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
 
 randomIndices = np.random.permutation(np.arange(X.shape[0]))
 
-X = X[randomIndices]
-Y = Y[randomIndices]
+# Split training data
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+# Train on all data
+# X = X[randomIndices]
+# Y = Y[randomIndices]
+# X_train = X
+# Y_train = Y
+# X_test = X
+# Y_test = Y
 
 # TODO: Split into train and test data when there is enough samples
 
-weights = train_softmax(X, Y)
+weights = train_softmax(X_train, Y_train)
 print_weights(weights)
 print_input(X)
 print_labels(Y)
 
 correct = 0
+train_correct = 0
 
 confusionMatrix = []
 for i in range(0, size):
@@ -125,15 +135,23 @@ for i in range(0, size):
 
 samples = [0] * size
 
-for i in range(0, len(X)):
-    prediction = predict(np.array([X[i]]), weights)[0]
+for i in range(0, len(X_test)):
+    prediction = predict(np.array([X_test[i]]), weights)[0]
     value = argmax(prediction)
-    true_value = argmax(Y[i])
+    true_value = argmax(Y_test[i])
     samples[true_value] += 1
     confusionMatrix[true_value][value] += 1
 
     if value == true_value:
         correct += 1
+
+for i in range(0, len(X_train)):
+    prediction = predict(np.array([X_train[i]]), weights)[0]
+    value = argmax(prediction)
+    true_value = argmax(Y_train[i])
+
+    if value == true_value:
+        train_correct += 1
 
 print('     ', list(map(lambda x: f' {inverse_cloud_type_map[x]} ', range(0, size))))
 for row in range(0, len(confusionMatrix)):
@@ -146,4 +164,5 @@ for row in range(0, len(confusionMatrix)):
     print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row]))
 
 print()
-print(correct / len(rows))
+print("Train", train_correct / len(X_train), " (",  train_correct, "/", len(X_train), ")")
+print("Test", correct / len(X_test), " (",  correct, "/", len(X_test), ")")
