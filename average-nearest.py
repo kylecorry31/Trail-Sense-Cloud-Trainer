@@ -8,24 +8,9 @@ rows = []
 data_root = 'data'
 
 with open('clouds.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
+    reader = csv.reader(csvfile)
     for row in reader:
         rows.append(row)
-
-size = 10
-
-cloud_type_map = {
-    'Ci': 0,
-    'Cc': 1,
-    'Cs': 2,
-    'As': 3,
-    'Ac': 4,
-    'Ns': 5,
-    'Sc': 6,
-    'Cu': 7,
-    'St': 8,
-    'Cb': 9
-}
 
 inverse_cloud_type_map = [
     'Ci',
@@ -40,6 +25,8 @@ inverse_cloud_type_map = [
     'Cb'
 ]
 
+size = len(inverse_cloud_type_map)
+
 # Runs softmax on X
 def predict(X, w):
     distances = np.zeros(shape=(w.shape[0]))
@@ -49,7 +36,7 @@ def predict(X, w):
     return [exponents / np.sum(exponents)]
 
 def distance(X, sample):
-    weights = np.array([[10, 20, 1, 1, 10, 10, 5, 5, 8, 8, 5, 5, 1]])
+    weights = np.array([[1] * len(sample)])
     weights = weights / np.sum(weights)
     return np.sum(np.abs(X - sample) * weights)
 
@@ -88,21 +75,7 @@ def get_label(id):
     return arr
 
 def get_data(row):
-    return [
-        float(row['CC']),
-        float(row['R']),
-        float(row['B']),
-        float(row['RG']),
-        float(row['RB']),
-        float(row['GB']),
-        float(row['EN']),
-        float(row['ENT']),
-        float(row['CON']),
-        float(row['HOM']),
-        float(row['BSTD']),
-        float(row['BSK']),
-        1
-    ]
+    return list(map(float, row[1:]))
 
 def argmax(values):
     m = 0
@@ -133,7 +106,7 @@ def print_labels(labels):
     f.close()
 
 X = np.array(list(map(get_data, rows)))
-Y = np.array(list(map(lambda x: get_label(cloud_type_map[x['Type']]), rows)))
+Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
 
 randomIndices = np.random.permutation(np.arange(X.shape[0]))
 
