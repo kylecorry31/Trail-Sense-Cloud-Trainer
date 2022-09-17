@@ -36,7 +36,7 @@ def predict(X, w):
 def train_softmax(X, y):
     w = np.random.randn(X.shape[1], y.shape[1]) * 0.1
     T = 1000
-    n = 5
+    n = 2
     N = X.shape[0]
     epsilon = 0.1
     randomIndices = np.random.permutation(np.arange(N))
@@ -161,7 +161,7 @@ for row in range(0, len(confusionMatrix)):
 print()
 
 for row in range(0, len(confusionMatrix)):
-    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row]))
+    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row] if samples[row] > 0 else 0.0))
 
 print()
 print("Train", train_correct / len(X_train), " (",  train_correct, "/", len(X_train), ")")

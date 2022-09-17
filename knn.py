@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
 
 rows = []
 
@@ -65,10 +66,20 @@ def print_labels(labels):
 X = np.array(list(map(lambda x: get_data(x), rows)))
 Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
 
+# Split training data
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+# Train on all data
+# X_train = X
+# Y_train = Y
+# X_test = X
+# Y_test = Y
+
 clf = KNeighborsClassifier(n_neighbors=7)
-clf.fit(X, Y)
+clf.fit(X_train, Y_train)
 
 correct = 0
+train_correct = 0
 
 confusionMatrix = []
 for i in range(0, size):
@@ -79,14 +90,24 @@ for i in range(0, size):
 
 samples = [0] * size
 
-for i in range(0, len(X)):
-    prediction = clf.predict_proba([X[i]])
+for i in range(0, len(X_train)):
+    prediction = clf.predict_proba([X_train[i]])
     for j in range(len(prediction)):
         prediction[j] = 1 - prediction[j][0][0]
     value = argmax(prediction)
-    true_value = argmax(Y[i])
+    true_value = argmax(Y_train[i])
     samples[true_value] += 1
     confusionMatrix[true_value][value] += 1
+
+    if value == true_value:
+        train_correct += 1
+
+for i in range(0, len(X_test)):
+    prediction = clf.predict_proba([X_test[i]])
+    for j in range(len(prediction)):
+        prediction[j] = 1 - prediction[j][0][0]
+    value = argmax(prediction)
+    true_value = argmax(Y_test[i])
 
     if value == true_value:
         correct += 1
@@ -98,7 +119,8 @@ for row in range(0, len(confusionMatrix)):
 print()
 
 for row in range(0, len(confusionMatrix)):
-    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row]))
+    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row] if samples[row] > 0 else 0.0))
 
 print()
-print(correct / len(rows))
+print("Train", train_correct / len(X_train), " (",  train_correct, "/", len(X_train), ")")
+print("Test", correct / len(X_test), " (",  correct, "/", len(X_test), ")")
