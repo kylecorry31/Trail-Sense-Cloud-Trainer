@@ -36,7 +36,7 @@ def predict(X, w):
 def train_softmax(X, y):
     w = np.random.randn(X.shape[1], y.shape[1]) * 0.1
     T = 1000
-    n = 2
+    n = 5
     N = X.shape[0]
     epsilon = 0.1
     randomIndices = np.random.permutation(np.arange(N))
