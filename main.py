@@ -25,7 +25,10 @@ inverse_cloud_type_map = [
     'Cb'
 ]
 
-size = len(inverse_cloud_type_map)
+family_map = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+# family_map = [0, 1, 2, 2, 1, 2, 3, 4, 2, 4]#[0, 1, 0, 2, 1, 2, 1, 1, 2, 1]
+
+size = max(family_map) + 1
 
 # Runs softmax on X
 def predict(X, w):
@@ -64,6 +67,7 @@ def fCE_gradient(X, w, y):
     return X.T.dot(pred) / float(n)
 
 def get_label(id):
+    id = family_map[id]
     global size
     arr = [0] * size
     arr[id] = 1
@@ -118,6 +122,35 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 
 # TODO: Split into train and test data when there is enough samples
 
+def forward_selection(k, X_train, Y_train, X_test, Y_test):
+    features = len(X_train[0])
+    chosen = []
+    while len(chosen) < k and features >= k:
+        m = -1
+        mf = -1
+        for f in range(0, features):
+            if f in chosen:
+                continue
+            weights = train_softmax(X_train[:, chosen + [f]], Y_train)
+            c = 0
+            t = X_test[:, chosen + [f]]
+            for i in range(0, len(t)):
+                prediction = predict(np.array([t[i]]), weights)[0]
+                value = argmax(prediction)
+                true_value = argmax(Y_test[i])
+
+                if value == true_value:
+                    c += 1
+            if c > m:
+                m = c
+                mf = f
+        chosen.append(mf)
+    return chosen
+
+# idx = forward_selection(4, X_train, Y_train, X_test, Y_test)
+# print(idx)
+# X_train = X_train[:, idx]
+# X_test = X_test[:, idx]
 weights = train_softmax(X_train, Y_train)
 print_weights(weights)
 print_input(X)

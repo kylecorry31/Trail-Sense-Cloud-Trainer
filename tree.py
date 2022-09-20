@@ -2,6 +2,9 @@ import numpy as np
 import csv
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
+import matplotlib.pyplot as plt
 
 rows = []
 
@@ -41,6 +44,27 @@ def argmax(values):
             m = i
     return m
 
+def print_weights(weights):
+    weight_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(lambda s: str(s) + 'f', x)) + ")", weights))
+    weight_arr = "arrayOf(" + ", ".join(weight_strings) + ")"
+    f = open(data_root + "/weights.txt", "w")
+    f.write(weight_arr)
+    f.close()
+
+def print_input(inputs):
+    x_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(lambda s: str(s) + 'f', x)) + ")", inputs))
+    x_arr = "arrayOf(" + ", ".join(x_strings) + ")"
+    f = open(data_root + "/input.txt", "w")
+    f.write(x_arr)
+    f.close()
+
+def print_labels(labels):
+    x_strings = list(map(lambda x: "arrayOf(" + ", ".join(map(str, x)) + ")", labels))
+    x_arr = "arrayOf(" + ", ".join(x_strings) + ")"
+    f = open(data_root + "/labels.txt", "w")
+    f.write(x_arr)
+    f.close()
+
 # 1, 5
 X = np.array(list(map(lambda x: get_data(x), rows)))
 Y = np.array(list(map(lambda x: get_label(int(x[0])), rows)))
@@ -54,30 +78,11 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 # X_test = X
 # Y_test = Y
 
-def forward_selection(k, X_train, Y_train, X_test, Y_Test):
-    features = len(X_train[0])
-    chosen = []
-    while len(chosen) < k and features >= k:
-        m = -1
-        mf = -1
-        for f in range(0, features):
-            if f in chosen:
-                continue
-            clf = KNeighborsClassifier(n_neighbors=5)
-            clf.fit(X_train[:, chosen + [f]], Y_train)
-            s = clf.score(X_test[:, chosen + [f]], Y_test)
-            if s > m:
-                m = s
-                mf = f
-        chosen.append(mf)
-    return chosen
+clf = RandomForestClassifier(n_estimators=10, max_depth=7).fit(X_train, Y_train)
+# clf = DecisionTreeClassifier(max_depth=4).fit(X_train, Y_train)
+print(clf.feature_importances_)
 
-clf = KNeighborsClassifier(n_neighbors=5)
-# idx = forward_selection(4, X_train, Y_train, X_test, Y_test)
-# print(idx)
-# X_train = X_train[:, idx]
-# X_test = X_test[:, idx]
-clf.fit(X_train, Y_train)
+# print(export_text(clf))
 
 correct = 0
 train_correct = 0
@@ -97,8 +102,6 @@ for i in range(0, len(X_train)):
         prediction[j] = 1 - prediction[j][0][0]
     value = argmax(prediction)
     true_value = argmax(Y_train[i])
-    samples[true_value] += 1
-    confusionMatrix[true_value][value] += 1
 
     if value == true_value:
         train_correct += 1
@@ -109,6 +112,8 @@ for i in range(0, len(X_test)):
         prediction[j] = 1 - prediction[j][0][0]
     value = argmax(prediction)
     true_value = argmax(Y_test[i])
+    samples[true_value] += 1
+    confusionMatrix[true_value][value] += 1
 
     if value == true_value:
         correct += 1
