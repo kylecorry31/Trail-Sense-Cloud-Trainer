@@ -194,7 +194,7 @@ for row in range(0, len(confusionMatrix)):
 print()
 
 for row in range(0, len(confusionMatrix)):
-    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row] if samples[row] > 0 else 0.0))
+    print(f'{inverse_cloud_type_map[row]:5}', "{:.2f}".format(confusionMatrix[row][row] / samples[row] if samples[row] > 0 else 0.0), " (", confusionMatrix[row][row], "/", samples[row], ")")
 
 print()
 print("Train", train_correct / len(X_train), " (",  train_correct, "/", len(X_train), ")")
