@@ -38,7 +38,7 @@ def predict(X, w):
 
 def train_softmax(X, y):
     w = np.random.randn(X.shape[1], y.shape[1]) * 0.1
-    T = 1000
+    T = 5000
     n = 5
     N = X.shape[0]
     epsilon = 0.1
